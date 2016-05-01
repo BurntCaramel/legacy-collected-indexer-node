@@ -1,0 +1,52 @@
+const fs = require('fs')
+const Path = require('path')
+const R = require('ramda')
+const nodePromise = require('./nodePromise')
+const hashFile = require('./hashFile') 
+
+const combineNamesAndValues = R.zipWith((name, value) => R.cond([
+    [R.has('hash'), ({ hash }) => ({ name, hash })],
+    [R.T, R.prop('children')]
+])(value))
+
+function hashChild(basePath, fileName, prefix) {
+    const filePath = Path.join(basePath, fileName)
+    
+    return nodePromise(callback => {
+        fs.lstat(filePath, callback)
+    })
+    .then(
+        R.cond([
+            [stats => stats.isFile(), R.always(
+                hashFile(filePath)
+                .then(R.objOf('hash'))
+            )],
+            [stats => stats.isDirectory(), R.always(
+                hashDirectory(filePath, Path.join(prefix, fileName))
+                .then(R.objOf('children'))
+            )],
+            [R.T, R.always(null)]
+        ])
+    )
+}
+
+function hashDirectory(path, prefix = '') {
+    return nodePromise(callback => {
+        fs.readdir(path, callback)
+    })
+    .then(R.reject(R.test(/^\./))) // Ignore .DS_Store
+    .then(childNames =>
+        Promise.all(childNames.map(fileName =>
+            hashChild(path, fileName, prefix)
+        ))
+        .then(R.pipe(
+            R.reject(R.isNil),
+            combineNamesAndValues(R.map(
+                childName => Path.join(prefix, childName),
+            childNames)),
+            R.flatten
+        ))
+    )
+}
+
+module.exports = hashDirectory

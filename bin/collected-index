@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+const Path = require('path')
+const R = require('ramda')
+const program = require('commander')
+const createIndex = require('../createIndex')
+
+const writeOut = R.curry((dirPath, output) => {
+    const fileName = 'index.collected'
+    fs.createWriteStream(Path.join(dirPath, fileName))
+        .end(output)
+})
+
+program.version('0.1.0')
+    .arguments('<dirPath>')
+    .action((dirPath) => {
+        createIndex(Path.resolve(dirPath))
+            .then(object => JSON.stringify(object, null, 2))
+            .then(writeOut(dirPath))
+    })
+    .parse(process.argv)

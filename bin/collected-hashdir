@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+const Path = require('path')
+const R = require('ramda')
+const program = require('commander')
+const hashDirectory = require('../hashDirectory')
+
+function writeOut(output) {
+    process.stdout.write(output)
+} 
+
+program.version('0.1.0')
+    .arguments('<dirpath>')
+    .action((dirpath) => {
+        hashDirectory(Path.resolve(dirpath))
+            .then(object => JSON.stringify(object, null, 2))
+            .then(writeOut)
+    })
+    .parse(process.argv)

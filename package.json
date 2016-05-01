@@ -1,0 +1,30 @@
+{
+  "name": "collected",
+  "version": "0.1.0",
+  "description": "Content/asset indexing",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Sidetone/collected-node.git"
+  },
+  "bin": "./bin/collected",
+  "keywords": [
+    "content",
+    "asset",
+    "index",
+    "indexing"
+  ],
+  "author": "Patrick Smith",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Sidetone/collected-node/issues"
+  },
+  "homepage": "https://github.com/Sidetone/collected-node#readme",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "ramda": "^0.21.0"
+  }
+}
