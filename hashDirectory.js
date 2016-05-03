@@ -34,7 +34,10 @@ function hashDirectory(path, prefix = '') {
     return nodePromise(callback => {
         fs.readdir(path, callback)
     })
-    .then(R.reject(R.test(/^\./))) // Ignore .DS_Store
+    .then(R.reject(R.anyPass([ // Ignore the following:
+        R.test(/^\./), // .DS_Store, .*
+        R.equals(indexFileName) // index.collected
+    ])))
     .then(childNames =>
         Promise.all(childNames.map(fileName =>
             hashChild(path, fileName, prefix)
