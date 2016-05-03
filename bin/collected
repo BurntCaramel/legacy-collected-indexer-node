@@ -7,6 +7,7 @@ const program = require('commander')
 const { version } = require('../package')
 
 program.version(version)
-    .command('hashdir <dirpath>', 'Hash each file in a directory')
     .command('index <dirpath>', 'Index a directory', { isDefault: true })
+    .command('hashdir <dirpath>', 'Hash each file in a directory')
+    .command('publish <host> <account> <filePath>', 'Publish a file or collection')
     .parse(process.argv)

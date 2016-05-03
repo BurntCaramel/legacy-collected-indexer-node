@@ -1,0 +1,32 @@
+#!/usr/bin/env node
+
+const fs = require('fs')
+const Path = require('path')
+const R = require('ramda')
+const program = require('commander')
+const publishFile = require('../publishFile')
+const publishDirectory = require('../publishDirectory')
+const { indexFileName } = require('../constants')
+const { version } = require('../package')
+
+program.version(version)
+    .option('--host <host>')
+    .option('--account <account>')
+    .option('--file')
+    .arguments('<path>')
+    .action((path) => {
+        const { host, account, file: isFile } = program
+        if (isFile) {
+            publishFile({
+                host,
+                account,
+                filePath: Path.resolve(path)
+            })
+                .then(object => JSON.stringify(object, null, 2))
+                .then(output => process.stdout.write(output))
+        }
+        else {
+            publishDirectory({ host, account, path })
+        }
+    })
+    .parse(process.argv)
