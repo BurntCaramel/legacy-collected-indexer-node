@@ -6,7 +6,7 @@ const hashFile = require('./hashFile')
 const { indexFileName } = require('./constants')
 
 const combineNamesAndValues = R.zipWith((name, value) => R.cond([
-    [R.has('hash'), R.merge({ name })],
+    [R.has('sha256'), R.merge({ name })],
     [R.T, R.prop('children')]
 ])(value))
 
@@ -21,7 +21,7 @@ function hashChild(basePath, fileName, prefix) {
             [stats => stats.isFile(), stats => (
                 hashFile(filePath)
                 .then(hash => ({
-                    hash,
+                    sha256: hash,
                     bytes: stats.size
                 }))
             )],
