@@ -4,16 +4,23 @@ const R = require('ramda')
 const hashDirectory = require('./hashDirectory')
 const publishFile = require('./publishFile')
 
-function publishDirectory({ host, account, path }) {
+const defaultObserve = R.curry((id, input) => {})
+
+function publishDirectory({ host, account, path, observe = defaultObserve }) {
     return hashDirectory(path)
         .then(R.pipe(
-            R.map(({ name, sha256 }) =>
+            R.tap(observe('hashedItems')),
+            R.map(({ name, sha256, bytes }) =>
                 publishFile({
                     filePath: Path.join(path, name),
                     hash: sha256,
                     host,
                     account
                 })
+                .then(R.tap(R.pipe(
+                    R.merge({ bytes }),
+                    observe('publishedItem')
+                )))
             ),
             Promise.all
         ))

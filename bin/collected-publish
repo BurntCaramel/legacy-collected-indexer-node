@@ -4,6 +4,7 @@ const fs = require('fs')
 const Path = require('path')
 const R = require('ramda')
 const program = require('commander')
+const Progress = require('progress')
 const publishFile = require('../publishFile')
 const publishDirectory = require('../publishDirectory')
 const { indexFileName } = require('../constants')
@@ -16,7 +17,13 @@ program.version(version)
     .arguments('<path>')
     .action((path) => {
         const { host, account, file: isFile } = program
+        if (R.any(R.isNil, [host, account])) {
+            console.error('Error: --host and --account must be passed.')
+            process.exit(9)
+        }
+        
         if (isFile) {
+            console.log(`Publishing file to @${account} ${host}`)
             publishFile({
                 host,
                 account,
@@ -26,7 +33,33 @@ program.version(version)
                 .then(output => process.stdout.write(output))
         }
         else {
-            publishDirectory({ host, account, path })
+            var bar;
+            console.log(`Publishing directory to @${account} ${host}`)
+            publishDirectory({
+                host, account, path,
+                observe: R.prop(R.__, {
+                    hashedItems(values) {
+                        const totalBytes = R.transduce(R.map(
+                            R.prop('bytes')
+                        ), R.add, 0, values)
+                        
+                        bar = new Progress(`Publishing [:bar] :percent :etas`, {
+                            width: 20,
+                            total: totalBytes,
+                            clear: false
+                        })
+                        bar.tick(0)
+                    },
+                    publishedItem({ bytes }) {
+                        bar.tick(bytes)
+                    }
+                })
+            })
+            .then(() => {
+                bar.update(1) // Complete
+                bar.terminate()
+                console.log('\nPublished successfully')
+            })
         }
     })
     .parse(process.argv)

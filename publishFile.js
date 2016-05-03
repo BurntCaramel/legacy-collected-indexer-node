@@ -9,7 +9,6 @@ function publishFile({ host, account, filePath, hash }) {
     return (
         R.isNil(hash) ? hashFile(filePath) : Promise.resolve(hash)
     ).then((hash) => {
-            console.log('hash', hash, 'filePath', filePath)
             const url = Url.format({
                 protocol: R.ifElse(
                     R.pipe(
@@ -23,7 +22,6 @@ function publishFile({ host, account, filePath, hash }) {
                 host,
                 pathname: `@${account}/${hash}`
             })
-            console.log('url', url)
             const stream = Fs.createReadStream(filePath)
             return fetch(url, { method: 'POST', body: stream })
         })
