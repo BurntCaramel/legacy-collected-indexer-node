@@ -25,6 +25,7 @@
   "homepage": "https://github.com/Sidetone/collected-node#readme",
   "dependencies": {
     "commander": "^2.9.0",
+    "node-fetch": "^1.5.1",
     "ramda": "^0.21.0"
   }
 }
