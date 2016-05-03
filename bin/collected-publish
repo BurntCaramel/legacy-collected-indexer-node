@@ -33,12 +33,19 @@ program.version(version)
                 .then(output => process.stdout.write(output))
         }
         else {
+            var stats = { newCount: 0 };
             var bar;
+            var barInterval = setInterval(() => {
+                if (bar) {
+                    bar.render()
+                }
+            }, 500)
             console.log(`Publishing directory to @${account} ${host}`)
             publishDirectory({
                 host, account, path,
                 observe: R.prop(R.__, {
                     hashedItems(values) {
+                        stats.totalCount = values.length
                         const totalBytes = R.transduce(R.map(
                             R.prop('bytes')
                         ), R.add, 0, values)
@@ -46,19 +53,22 @@ program.version(version)
                         bar = new Progress(`Publishing [:bar] :percent :etas`, {
                             width: 20,
                             total: totalBytes,
-                            clear: false
+                            callback() {
+                                clearInterval(barInterval)
+                            
+                                console.log('\nPublished successfully')
+                                console.log(`${stats.newCount} / ${stats.totalCount} items were new.`)
+                            }
                         })
                         bar.tick(0)
                     },
-                    publishedItem({ bytes }) {
+                    publishedItem({ bytes, wasNew }) {
+                        if (wasNew) {
+                            stats.newCount += 1
+                        }
                         bar.tick(bytes)
                     }
                 })
-            })
-            .then(() => {
-                bar.update(1) // Complete
-                bar.terminate()
-                console.log('\nPublished successfully')
             })
         }
     })
