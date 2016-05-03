@@ -5,14 +5,15 @@ const Path = require('path')
 const R = require('ramda')
 const program = require('commander')
 const createIndex = require('../createIndex')
+const { indexFileName } = require('../constants')
+const { version } = require('../package')
 
 const writeOut = R.curry((dirPath, output) => {
-    const fileName = 'index.collected'
-    fs.createWriteStream(Path.join(dirPath, fileName))
+    fs.createWriteStream(Path.join(dirPath, indexFileName))
         .end(output)
 })
 
-program.version('0.1.0')
+program.version(version)
     .arguments('<dirPath>')
     .action((dirPath) => {
         createIndex(Path.resolve(dirPath))
