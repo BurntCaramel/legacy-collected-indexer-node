@@ -2,10 +2,11 @@ const fs = require('fs')
 const Path = require('path')
 const R = require('ramda')
 const nodePromise = require('./nodePromise')
-const hashFile = require('./hashFile') 
+const hashFile = require('./hashFile')
+const { indexFileName } = require('./constants')
 
 const combineNamesAndValues = R.zipWith((name, value) => R.cond([
-    [R.has('hash'), ({ hash }) => ({ name, hash })],
+    [R.has('hash'), R.merge({ name })],
     [R.T, R.prop('children')]
 ])(value))
 
@@ -17,15 +18,17 @@ function hashChild(basePath, fileName, prefix) {
     })
     .then(
         R.cond([
-            [stats => stats.isFile(), R.always(
+            [stats => stats.isFile(), stats => (
                 hashFile(filePath)
-                .then(R.objOf('hash'))
+                .then(hash => ({
+                    hash,
+                    bytes: stats.size
+                }))
             )],
             [stats => stats.isDirectory(), R.always(
                 hashDirectory(filePath, Path.join(prefix, fileName))
                 .then(R.objOf('children'))
-            )],
-            [R.T, R.always(null)]
+            )]
         ])
     )
 }
