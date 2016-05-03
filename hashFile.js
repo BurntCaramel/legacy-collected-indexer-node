@@ -1,22 +1,11 @@
-const crypto = require('crypto')
+const R = require('ramda')
 const fs = require('fs')
+const hashStream = require('./hashStream')
 
 
-function hashFile(fileName) {
-    return new Promise((resolve, reject) => {
-        const hash = crypto.createHash('sha256')
-        const input = fs.createReadStream(fileName)
-        input.on('readable', () => {
-            const data = input.read()
-            if (data) {
-                hash.update(data)
-            }
-            else {
-                resolve(hash.digest('hex'))
-            }
-        })
-        input.on('error', reject)
-    })
-}
+const hashFile = R.pipe(
+    fs.createReadStream,
+    hashStream
+)
 
 module.exports = hashFile
