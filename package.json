@@ -1,6 +1,6 @@
 {
   "name": "collected",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Content/asset indexing",
   "main": "index.js",
   "scripts": {
