@@ -20,7 +20,7 @@ function publishFile({ host, account, filePath, hash }) {
                     R.always('https')
                 )(host),
                 host,
-                pathname: `@${account}/${hash}`
+                pathname: `/1/@${account}/${hash}`
             })
             const stream = Fs.createReadStream(filePath)
             return fetch(url, { method: 'POST', body: stream })
