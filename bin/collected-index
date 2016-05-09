@@ -1,23 +1,15 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
 const Path = require('path')
 const R = require('ramda')
 const program = require('commander')
-const createIndex = require('../createIndex')
+const createIndexFile = require('../createIndexFile')
 const { indexFileName } = require('../constants')
 const { version } = require('../package')
 
-const writeOut = R.curry((dirPath, output) => {
-    fs.createWriteStream(Path.join(dirPath, indexFileName))
-        .end(output)
-})
-
 program.version(version)
-    .arguments('<dirPath>')
-    .action((dirPath) => {
-        createIndex(Path.resolve(dirPath))
-            .then(object => JSON.stringify(object, null, 2))
-            .then(writeOut(dirPath))
-    })
-    .parse(process.argv)
+.arguments('<dirPath>')
+.action((dirPath) => {
+	createIndexFile(Path.resolve(dirPath))
+})
+.parse(process.argv)

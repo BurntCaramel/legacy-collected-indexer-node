@@ -1,75 +1,20 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
+const Fs = require('fs')
 const Path = require('path')
 const R = require('ramda')
 const program = require('commander')
 const Progress = require('progress')
-const publishFile = require('../publishFile')
-const publishDirectory = require('../publishDirectory')
-const { indexFileName } = require('../constants')
+const publishCommand = require('../commands/publish')
 const { version } = require('../package')
 
 program.version(version)
     .option('--host <host>')
     .option('--account <account>')
-    .option('--file')
+    .option('--files')
     .arguments('<path>')
     .action((path) => {
-        const { host, account, file: isFile } = program
-        if (R.any(R.isNil, [host, account])) {
-            console.error('Error: --host and --account must be passed.')
-            process.exit(9)
-        }
-        
-        if (isFile) {
-            console.log(`Publishing file to @${account} ${host}`)
-            publishFile({
-                host,
-                account,
-                filePath: Path.resolve(path)
-            })
-                .then(object => JSON.stringify(object, null, 2))
-                .then(output => process.stdout.write(output))
-        }
-        else {
-            var stats = { newCount: 0 };
-            var bar;
-            var barInterval = setInterval(() => {
-                if (bar) {
-                    bar.render()
-                }
-            }, 500)
-            console.log(`Publishing directory to @${account} ${host}`)
-            publishDirectory({
-                host, account, path,
-                observe: R.prop(R.__, {
-                    hashedItems(values) {
-                        stats.totalCount = values.length
-                        const totalBytes = R.transduce(R.map(
-                            R.prop('bytes')
-                        ), R.add, 0, values)
-                        
-                        bar = new Progress(`Publishing [:bar] :percent :etas`, {
-                            width: 20,
-                            total: totalBytes,
-                            callback() {
-                                clearInterval(barInterval)
-                            
-                                console.log('\nPublished successfully')
-                                console.log(`${stats.newCount} / ${stats.totalCount} items were new.`)
-                            }
-                        })
-                        bar.tick(0)
-                    },
-                    publishedItem({ bytes, wasNew }) {
-                        if (wasNew) {
-                            stats.newCount += 1
-                        }
-                        bar.tick(bytes)
-                    }
-                })
-            })
-        }
+        const { host, account, files } = program
+				publishCommand({ host, account, path, files })
     })
     .parse(process.argv)

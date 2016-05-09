@@ -5,10 +5,10 @@ const nodePromise = require('./nodePromise')
 const { indexFileName } = require('./constants')
 
 const readIndex = R.pipeP(
-    (dirName) => nodePromise(callback => {
-        fs.readFile(Path.join(dirName, indexFileName), callback)
-    }),
-    JSON.parse
+	(dirPath) => nodePromise(callback => {
+		fs.readFile(Path.join(dirPath, indexFileName), callback)
+	}),
+	JSON.parse
 )
 
 module.exports = readIndex

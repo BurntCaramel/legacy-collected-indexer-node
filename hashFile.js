@@ -4,8 +4,8 @@ const hashStream = require('./hashStream')
 
 
 const hashFile = R.pipe(
-    fs.createReadStream,
-    hashStream
+	fs.createReadStream,
+	hashStream
 )
 
 module.exports = hashFile

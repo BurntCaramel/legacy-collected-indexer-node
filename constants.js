@@ -1,3 +1,3 @@
 module.exports = {
-    indexFileName: 'index.collected'
+	indexFileName: 'index.collected'
 }
