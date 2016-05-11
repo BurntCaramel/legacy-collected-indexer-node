@@ -3,7 +3,7 @@ const R = require('ramda')
 const readIndex = require('./readIndex')
 const hashDirectory = require('./hashDirectory')
 
-const groupByHash = R.reduceBy((acc, item) => acc.concat(item.name), [], R.prop('sha256'))
+//const groupByHash = R.reduceBy((acc, item) => acc.concat(item.name), [], R.prop('sha256'))
 
 const createIndex = R.converge(
 	(...promises) => (
@@ -26,8 +26,7 @@ const createIndex = R.converge(
 		R.pipeP(
 			hashDirectory,
 			(items) => ({
-				items,
-				hashes: groupByHash(items)
+				items
 			})
 		)
 	]
