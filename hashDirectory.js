@@ -3,10 +3,11 @@ const Path = require('path')
 const R = require('ramda')
 const nodePromise = require('./nodePromise')
 const hashFile = require('./hashFile')
+const mimos = require('./mimos')
 const { indexFileName } = require('./constants')
 
-const combineNamesAndValues = R.zipWith((name, value) => R.cond([
-	[R.has('sha256'), R.merge({ name })],
+const combineNamesAndValues = R.zipWith((path, value) => R.cond([
+	[R.has('sha256'), R.merge({ path })],
 	[R.T, R.prop('children')]
 ])(value))
 
@@ -22,7 +23,8 @@ function hashChild(basePath, fileName, prefix) {
 				hashFile(filePath)
 				.then(hash => ({
 					sha256: hash,
-					bytes: stats.size
+					bytes: stats.size,
+					mimeType: mimos.path(filePath).type
 				}))
 			)],
 			[stats => stats.isDirectory(), R.always(
