@@ -3,6 +3,9 @@ const Url = require('url')
 const Fs = require('fs')
 const Path = require('path')
 const fetch = require('node-fetch')
+const getHomeConfig = require('./getHomeConfig')
+
+const { token } = getHomeConfig()
 
 function publish({ host, account, body, sha256 }) {
 	return new Promise((resolve, reject) => {
@@ -19,7 +22,14 @@ function publish({ host, account, body, sha256 }) {
 			host,
 			pathname: `/1/@${account}/${sha256}`
 		})
-		fetch(url, { method: 'POST', body }).then(resolve, reject)
+		fetch(url, {
+			method: 'PUT',
+			headers: {
+				"Authorization": `Bearer ${token}`
+			},
+			body
+		})
+		.then(resolve, reject)
 	})
 	.then((response) => response.json())
 }
