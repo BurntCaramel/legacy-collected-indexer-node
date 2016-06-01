@@ -85,7 +85,22 @@ function publishFiles({ host, account, path }) {
 	})
 }
 
-module.exports = ({ host, account, path, files }) => {
+exports.command = 'publish'
+
+exports.describe = 'Publish an index.collected file to the cloud'
+
+exports.builder = {
+	host: {},
+	account: {
+		demand: true
+	},
+	path: {
+		demand: true
+	},
+	files: {}
+}
+
+exports.handler = ({ host, account, path, files }) => {
 	if (R.any(R.isNil, [host, account])) {
 		console.error('Error: --host and --account must be passed.')
 		process.exit(9)

@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 
-const fs = require('fs')
-const Path = require('path')
-const R = require('ramda')
-const program = require('commander')
-const { version } = require('../package')
-
-program.version(version)
-    .command('index <dirpath>', 'Index a directory', { isDefault: true })
-    .command('hashdir <dirpath>', 'Hash each file in a directory')
-    .command('publish <host> <account> <filePath>', 'Publish a file or collection')
-    .parse(process.argv)
+require('yargs')
+.version()
+//.command('index <dirpath>', 'Index a directory', { isDefault: true })
+//.command('hashdir <dirpath>', 'Hash each file in a directory')
+//.command('login', 'Log in to a particular account')
+//.command('publish <host> <account> <filePath>', 'Publish a file or collection')
+//.command('now <filePath>', 'Deploy a collection to now')
+.command(require('../commands/hashdir'))
+.command(require('../commands/index'))
+.command(require('../commands/login'))
+.command(require('../commands/publish'))
+.help()
+.argv
