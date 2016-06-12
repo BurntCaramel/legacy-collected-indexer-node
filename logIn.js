@@ -1,34 +1,36 @@
 const R = require('ramda')
-const fetch = require('node-fetch')
+const axios = require('axios')
 const FS = require('fs')
 const OS = require('os')
 const Path = require('path')
 const getURL = require('./getURL')
 const nodePromise = require('./nodePromise')
 
-function requestLogInCode({ host, email }) {
-	return fetch(getURL({ host, path: `/1/auth/start` }), {
-		method: 'POST',
-		body: { email }
+const requestLogInCode = ({ host, email }) => (
+	axios.post(getURL({ host, path: `/1/auth/start` }), {
+		email
 	})
-	.then((response) => response.json())
-}
+	.then(R.prop('data'))
+)
 
-function verifyLogInCode({ host, email, code }) {
-	return fetch(getURL({ host, path: `/1/auth/verify` }), {
-		method: 'POST',
-		body: { email, code }
+const writeLocalToken = (token) => nodePromise((callback) => {
+	FS.writeFile(
+		Path.join(OS.homedir(), '.collected.json'),
+		JSON.stringify({ token }),
+		callback
+	)
+})
+
+const verifyLogInCode = ({ host, email, code }) => (
+	axios.post(getURL({ host, path: `/1/auth/verify` }), {
+		email, code
 	})
-	.then((response) => response.json())
-	.then(({ id_token }) => nodePromise((callback) => {
-		FS.writeFile(
-			Path.join(OS.homedir(), '.collected.json'),
-			JSON.stringify({ token: id_token }),
-			callback
-		)
-	}))
+	.then(R.pipe(
+		R.path(['data', 'id_token']),
+		writeLocalToken
+	))
 	.then(R.always({ success: true }))
-}
+)
 
 module.exports = { 
 	requestLogInCode,

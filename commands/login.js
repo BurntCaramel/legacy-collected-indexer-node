@@ -9,20 +9,30 @@ exports.builder = {
 	email: {
 		demand: true
 	},
-	code: {}
+	code: {
+		type: 'string'
+	}
 }
 
 exports.handler = ({ host, email, code }) => {
 	if (code) {
+		console.log('Verifying code…')
+		
 		verifyLogInCode({ host, email, code })
-		.then(() => {
-			console.log('Logged in successfully.')
-		})
+		.then(
+			() => {
+				console.log('Logged in successfully.')
+			},
+			console.error
+		)
 	}
 	else {
 		requestLogInCode({ host, email })
-		.then(() => {
-			console.log('Check your email for the verification code.')
-		})
+		.then(
+			() => {
+				console.log('Check your email for the verification code.')
+			},
+			console.error
+		)
 	}
 }
