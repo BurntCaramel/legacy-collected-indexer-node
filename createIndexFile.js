@@ -5,11 +5,6 @@ const R = require('ramda')
 const createIndex = require('./createIndex')
 const { indexFileName } = require('./constants')
 
-const writeOut = (dirPath, data) => {
-	Fs.createWriteStream(Path.resolve(dirPath, indexFileName))
-	.end(data)
-}
-
 function createIndexFile(dirPath) {
 	return createIndex(dirPath)
 	.then(({ index, jsonString, sha256, bytes }) => (

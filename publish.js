@@ -1,22 +1,20 @@
 const R = require('ramda')
-const fetch = require('node-fetch')
+const axios = require('axios')
 const getHomeConfig = require('./getHomeConfig')
 const getURL = require('./getURL')
 
 const { token } = getHomeConfig()
 
-function publish({ host, account, body, sha256 }) {
-	return new Promise((resolve, reject) => {
-		fetch(getURL({ host, path: `/1/@${account}/${sha256}` }), {
-			method: 'PUT',
+const publish = ({ host, account, body, sha256 }) => (
+	axios.put(
+		getURL({ host, path: `/1/@${account}/${sha256}` }),
+		body, {
 			headers: {
-				"Authorization": `Bearer ${token}`
-			},
-			body
-		})
-		.then(resolve, reject)
-	})
-	.then((response) => response.json())
-}
+				'Authorization': `Bearer ${token}`
+			}
+		}
+	)
+	.then(R.prop('data'))
+)
 
 module.exports = publish

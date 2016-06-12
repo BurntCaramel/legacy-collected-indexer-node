@@ -10,27 +10,28 @@ const publishItems = require('./publishItems')
 const publishIndex = ({ host, account, dirPath, observe }) => (
 	createIndexFile(dirPath)
 	.then(R.tap(R.pipe(
-		//(output) => { console.log(output); return output },
 		R.path(['index', 'items']),
 		observe('hashedItems')
 	)))
-	.then(({ index, jsonString, sha256, bytes }) => Promise.all([
-		publishItems({
-			host,
-			account,
-			items: index.items,
-			basePath: dirPath,
-			observe
-		}),
-		publish({
-			host,
-			account,
-			sha256,
-			body: jsonString
-		})
-	]).then(
-		R.always({ sha256 })
-	))
+	.then(({ index, jsonString, sha256, bytes }) => (
+		Promise.all([
+			publishItems({
+				host,
+				account,
+				items: index.items,
+				basePath: dirPath,
+				observe
+			}),
+			publish({
+				host,
+				account,
+				sha256,
+				body: jsonString
+			})
+		]).then(
+			R.always({ sha256 })
+		))
+	)
 )
 
 module.exports = publishIndex

@@ -3,11 +3,11 @@ const R = require('ramda')
 const hashDirectory = require('./hashDirectory')
 const publishFile = require('./publishFile')
 
-function publishItems({ host, account, items, basePath, observe }) {
-	return Promise.all(
-		R.map(({ name, sha256, bytes }) =>
+const publishItems = ({ host, account, items, basePath, observe }) => (
+	Promise.all(
+		R.map(({ path, sha256, bytes }) => (
 			publishFile({
-				filePath: Path.join(basePath, name),
+				filePath: Path.join(basePath, path),
 				sha256,
 				host,
 				account
@@ -16,8 +16,8 @@ function publishItems({ host, account, items, basePath, observe }) {
 				R.merge({ bytes }),
 				observe('publishedItem')
 			)))
-		)(items)
+		), items)
 	)
-}
+)
 
 module.exports = publishItems

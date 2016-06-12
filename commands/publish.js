@@ -13,6 +13,16 @@ const nodePromise = require('../nodePromise')
 class PublishState {
 	constructor() {
 		this.newCount = 0
+		
+		this.start()
+	}
+	
+	start() {
+		process.stdin.resume()
+	}
+	
+	finish() {
+		process.stdin.pause()
 	}
 	
 	hashedItems(values) {
@@ -49,7 +59,7 @@ class PublishState {
 	}
 }
 
-function publishFiles({ host, account, path }) {
+function publishFiles({ host, account, path, state }) {
 	nodePromise(callback => {
 		Fs.stat(path, callback)
 	})
@@ -62,12 +72,21 @@ function publishFiles({ host, account, path }) {
 				account,
 				filePath: Path.resolve(path)
 			})
-			.then(object => JSON.stringify(object, null, 2))
-			.then(output => process.stdout.write(output))
+			.then((object) => JSON.stringify(object, null, 2))
+			.then((output) => {
+				process.stdout.write(output)
+				
+				state.finish()
+			})
+			.catch((error) => {
+				console.error('error', R.pipe(
+					(error) => R.pathOr(error, ['statusText'], error)
+				)(error))
+				
+				state.finish()
+			})
 		}
 		else if (stats.isDirectory()) {
-			const state = new PublishState()
-			
 			console.log(`Publishing directory to @${account} ${host}`)
 			
 			publishDirectory({
@@ -81,23 +100,25 @@ function publishFiles({ host, account, path }) {
 					}
 				})
 			})
+			.then(() => {
+				state.finish()
+			})
 		}
 	})
 }
 
-exports.command = 'publish'
+exports.command = 'publish <path>'
 
-exports.describe = 'Publish an index.collected file to the cloud'
+exports.describe = 'Publish a collected index and its contents to the cloud'
 
 exports.builder = {
 	host: {},
 	account: {
 		demand: true
 	},
-	path: {
-		demand: true
-	},
-	files: {}
+	files: {
+		boolean: true
+	}
 }
 
 exports.handler = ({ host, account, path, files }) => {
@@ -108,16 +129,17 @@ exports.handler = ({ host, account, path, files }) => {
 	
 	path = Path.resolve(path)
 	
+	const state = new PublishState()
+	
 	if (files) {
 		publishFiles({
 			host,
 			account,
-			path
+			path,
+			state
 		})
 	}
 	else {
-		const state = new PublishState()
-		
 		console.log(`Publishing index and its contents to @${account} ${host}`)
 		
 		publishIndex({
@@ -139,6 +161,13 @@ exports.handler = ({ host, account, path, files }) => {
 		})
 		.then(({ sha256 }) => {
 			console.log(`Published index ${sha256}`)
+			
+			state.finish()
+		})
+		.catch((error) => {
+			console.error(error)
+			
+			state.finish()
 		})
 	}
 }
