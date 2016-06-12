@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/Sidetone/collected-node#readme",
   "dependencies": {
+    "axios": "^0.11.1",
     "bytes": "^2.3.0",
     "mimos": "^3.0.1",
     "node-fetch": "^1.5.1",
