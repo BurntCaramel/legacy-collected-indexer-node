@@ -20,8 +20,17 @@ const createIndex = R.converge(
 			return { index, jsonString, sha256, bytes }
 		})
 	), [
-		R.pipeP(
-			readIndex
+		R.pipe(
+			readIndex,
+			(promise) => promise.catch((error) => {
+				if (error.code === 'ENOENT') {
+					return {};
+				}
+				else {
+					console.error(error)
+					throw error;
+				}
+			})
 		),
 		R.pipeP(
 			hashDirectory,
